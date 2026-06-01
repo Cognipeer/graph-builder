@@ -1,6 +1,6 @@
 import { analyzeGraph } from "./analyze.js";
 import { buildArtifacts } from "./artifacts.js";
-import { buildGraph, validateGraph } from "./build.js";
+import { buildGraph, resolveEntities, validateGraph } from "./build.js";
 import { collectChangedTextItems, collectTextItems } from "./provider.js";
 import { createGraphBuilderResult, loadGraphBuilderResult } from "./result.js";
 import { mergeSemanticFragment } from "./semantic.js";
@@ -53,12 +53,19 @@ export function createGraphBuilder(config: GraphBuilderConfig = {}) {
     timings.collect = Date.now() - startedAt;
 
     const extractStartedAt = Date.now();
-    const extractions = await Promise.all(items.map((item) => extractGraphBuilderItem(item, options)));
+    const concurrency = options.concurrency ?? 0;
+    const extractions = concurrency > 0
+      ? await extractWithConcurrency(items, options, concurrency)
+      : await Promise.all(items.map((item) => extractGraphBuilderItem(item, options)));
     timings.extract = Date.now() - extractStartedAt;
 
     const buildStartedAt = Date.now();
     let graph = buildGraph(extractions);
     timings.build = Date.now() - buildStartedAt;
+
+    if (options.entityResolution) {
+      graph = resolveEntities(graph);
+    }
 
     const warnings: string[] = [];
     const modelUsage = [];
@@ -113,4 +120,23 @@ export function createGraphBuilder(config: GraphBuilderConfig = {}) {
     updateGraph,
     loadGraph: loadGraphBuilderResult
   };
+}
+
+async function extractWithConcurrency(
+  items: GraphBuilderTextItem[],
+  options: GraphBuilderOptions,
+  concurrency: number
+): Promise<GraphBuilderExtraction[]> {
+  const results: GraphBuilderExtraction[] = new Array(items.length);
+  let index = 0;
+
+  async function worker(): Promise<void> {
+    while (index < items.length) {
+      const i = index++;
+      results[i] = await extractGraphBuilderItem(items[i]!, options);
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => worker()));
+  return results;
 }

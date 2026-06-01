@@ -349,4 +349,88 @@ export function start() { schedule(); }
     expect(files.some((file) => file.endsWith("graph.graphml"))).toBe(true);
     await expect(readFile(join(dir, "GRAPH_REPORT.md"), "utf8")).resolves.toContain("Graph Builder Report");
   });
+
+  it("computes pageRank, betweenness centrality and bridge nodes", async () => {
+    const result = await graphBuilder.fromTexts([
+      {
+        id: "docs/a.md",
+        title: "A",
+        path: "docs/a.md",
+        text: "# A\n\nSee [B](b.md) and [C](c.md)."
+      },
+      {
+        id: "docs/b.md",
+        title: "B",
+        path: "docs/b.md",
+        text: "# B\n\nSee [C](c.md)."
+      },
+      {
+        id: "docs/c.md",
+        title: "C",
+        path: "docs/c.md",
+        text: "# C\n\nFinal document."
+      }
+    ]);
+
+    expect(result.analysis.pageRank).toBeDefined();
+    expect(Object.keys(result.analysis.pageRank!).length).toBeGreaterThan(0);
+    expect(result.analysis.betweenness).toBeDefined();
+    expect(result.analysis.bridgeNodes).toBeDefined();
+  });
+
+  it("merges cross-document entities with entityResolution", async () => {
+    const result = await graphBuilder.fromTexts([
+      {
+        id: "src/auth.ts",
+        title: "Auth",
+        path: "src/auth.ts",
+        text: "export class TokenService { validate() {} }\nexport function authenticate() {}"
+      },
+      {
+        id: "src/gateway.ts",
+        title: "Gateway",
+        path: "src/gateway.ts",
+        text: "export class TokenService { refresh() {} }\nexport function route() {}"
+      }
+    ], { entityResolution: true });
+
+    const tokenNodes = result.graph.nodes.filter((n) => n.label === "TokenService");
+    expect(tokenNodes.length).toBe(1);
+    expect(tokenNodes[0]?.mergedFrom?.length).toBe(2);
+  });
+
+  it("respects concurrency limit during extraction", async () => {
+    const items = Array.from({ length: 8 }, (_, i) => ({
+      id: `docs/doc-${i}.md`,
+      title: `Doc ${i}`,
+      path: `docs/doc-${i}.md`,
+      text: `# Doc ${i}\n\nContent of document ${i}.`
+    }));
+
+    const result = await graphBuilder.fromTexts(items, { concurrency: 3 });
+    expect(result.graph.stats.sourceCount).toBe(8);
+  });
+
+  it("weighted shortest path prefers high-confidence edges", async () => {
+    const result = await graphBuilder.fromTexts([
+      { id: "docs/x.md", title: "X", path: "docs/x.md", text: "# X\n\nSee [Y](y.md)." },
+      { id: "docs/y.md", title: "Y", path: "docs/y.md", text: "# Y\n\nSee [Z](z.md)." },
+      { id: "docs/z.md", title: "Z", path: "docs/z.md", text: "# Z\n\nEnd." }
+    ]);
+
+    const path = result.query.path("X", "Z");
+    expect(path).not.toBeNull();
+    expect(path!.nodes.length).toBeGreaterThan(1);
+    expect(path!.totalWeight).toBeGreaterThan(0);
+  });
+
+  it("generates D3.js interactive HTML", async () => {
+    const result = await graphBuilder.fromTexts([
+      { id: "docs/viz.md", title: "Viz", path: "docs/viz.md", text: "# Viz\n\nVisualization test." }
+    ], { artifacts: ["html"] });
+
+    expect(result.artifacts.html).toContain("d3js.org");
+    expect(result.artifacts.html).toContain("forceSimulation");
+    expect(result.artifacts.html).toContain("Graph Builder");
+  });
 });

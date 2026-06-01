@@ -1,4 +1,4 @@
-import { buildGraph, validateGraph, withInferredReferences } from "./core/build.js";
+import { buildGraph, resolveEntities, validateGraph, withInferredReferences } from "./core/build.js";
 import { updateGraph } from "./core/incremental.js";
 import { createArrayProvider } from "./core/provider.js";
 import { getNeighbors, getNode, queryGraph, shortestPath } from "./core/query.js";
@@ -68,6 +68,7 @@ export {
   loadGraphBuilderResult,
   mergeSemanticFragment,
   queryGraph,
+  resolveEntities,
   serializeGraph,
   shortestPath,
   updateGraph,

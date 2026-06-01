@@ -71,6 +71,7 @@ export interface GraphBuilderNode {
   storageRef?: StorageRef;
   community?: number;
   normalizedLabel?: string;
+  mergedFrom?: string[];
   metadata?: Record<string, unknown>;
 }
 
@@ -186,6 +187,9 @@ export interface GraphBuilderAnalysis {
     reason: string;
   }>;
   communities: GraphBuilderCommunity[];
+  pageRank?: Record<string, number>;
+  betweenness?: Record<string, number>;
+  bridgeNodes?: Array<{ id: string; label: string; degree: number }>;
 }
 
 export interface GraphBuilderArtifacts {
@@ -242,6 +246,7 @@ export interface GraphBuilderQueryResult {
 export interface GraphBuilderPathResult {
   nodes: GraphBuilderNode[];
   edges: GraphBuilderEdge[];
+  totalWeight?: number;
 }
 
 export interface GraphBuilderNeighbor {
@@ -297,6 +302,8 @@ export interface GraphBuilderOptions {
   providerOptions?: unknown;
   extractor?: GraphBuilderExtractor | ((item: GraphBuilderTextItem) => GraphBuilderExtraction | Promise<GraphBuilderExtraction>);
   semantic?: GraphBuilderSemanticOptions;
+  concurrency?: number;
+  entityResolution?: boolean;
 }
 
 export type GraphBuilderInput =

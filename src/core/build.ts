@@ -86,6 +86,81 @@ export function buildGraph(extractions: GraphBuilderExtraction[]): GraphBuilderG
   });
 }
 
+const MERGE_ELIGIBLE_TYPES = new Set(["function", "class", "interface", "type", "enum", "method", "symbol"]);
+
+export function resolveEntities(graph: GraphBuilderGraph): GraphBuilderGraph {
+  const groups = new Map<string, GraphBuilderNode[]>();
+  const utility = new Set(["tag", "resource", "package", "document", "code_file"]);
+
+  for (const node of graph.nodes) {
+    if (utility.has(node.type) || !MERGE_ELIGIBLE_TYPES.has(node.type)) {
+      continue;
+    }
+    const key = `${node.normalizedLabel ?? normalizeLabel(node.label)}:${node.type}`;
+    groups.set(key, [...(groups.get(key) ?? []), node]);
+  }
+
+  const mergeMap = new Map<string, string>();
+  const processedIds = new Set<string>();
+  const mergedNodes: GraphBuilderNode[] = [];
+
+  for (const [, members] of groups) {
+    const multiSource = new Set(members.map((m) => m.sourceItemId).filter(Boolean)).size > 1;
+    if (!multiSource || members.length < 2) {
+      for (const m of members) {
+        if (!processedIds.has(m.id)) {
+          mergedNodes.push(m);
+          processedIds.add(m.id);
+        }
+      }
+      continue;
+    }
+
+    const canonical = members[0]!;
+    const mergedFrom = members.map((m) => m.id);
+    mergedNodes.push({ ...canonical, mergedFrom });
+    for (const m of members) {
+      mergeMap.set(m.id, canonical.id);
+      processedIds.add(m.id);
+    }
+  }
+
+  for (const node of graph.nodes) {
+    if (!processedIds.has(node.id)) {
+      mergedNodes.push(node);
+      processedIds.add(node.id);
+    }
+  }
+
+  const remapId = (id: string) => mergeMap.get(id) ?? id;
+  const edgeKeys = new Set<string>();
+  const remappedEdges: GraphBuilderEdge[] = [];
+
+  for (const edge of graph.edges) {
+    const source = remapId(edge.source);
+    const target = remapId(edge.target);
+    if (source === target) {
+      continue;
+    }
+    const key = `${source}:${target}:${edge.relation}:${edge.sourceItemId ?? ""}`;
+    if (!edgeKeys.has(key)) {
+      remappedEdges.push({ ...edge, source, target });
+      edgeKeys.add(key);
+    }
+  }
+
+  return {
+    ...graph,
+    nodes: mergedNodes,
+    edges: remappedEdges,
+    stats: {
+      ...graph.stats,
+      nodeCount: mergedNodes.length,
+      edgeCount: remappedEdges.length
+    }
+  };
+}
+
 export function validateGraph(graph: GraphBuilderGraph): string[] {
   const errors: string[] = [];
   const nodeIds = new Set(graph.nodes.map((node) => node.id));

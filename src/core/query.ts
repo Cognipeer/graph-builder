@@ -74,30 +74,45 @@ export function shortestPath(
     return null;
   }
 
+  if (source.id === target.id) {
+    return { nodes: [source], edges: [], totalWeight: 0 };
+  }
+
   const adjacency = buildAdjacency(graph);
-  const queue: string[] = [source.id];
-  const visited = new Set<string>([source.id]);
+
+  const edgeWeight = (edge: GraphBuilderEdge) => 1 / Math.max(edge.confidenceScore ?? 0.5, 0.01);
+
+  const dist = new Map<string, number>(graph.nodes.map((n) => [n.id, Infinity]));
   const parentNode = new Map<string, string>();
   const parentEdge = new Map<string, GraphBuilderEdge>();
+  dist.set(source.id, 0);
 
-  while (queue.length > 0) {
-    const current = queue.shift()!;
+  const pq: Array<{ id: string; cost: number }> = [{ id: source.id, cost: 0 }];
+
+  while (pq.length > 0) {
+    pq.sort((left, right) => left.cost - right.cost);
+    const { id: current, cost } = pq.shift()!;
+
     if (current === target.id) {
       break;
     }
-    for (const edge of adjacency.get(current) ?? []) {
+    if (cost > (dist.get(current) ?? Infinity)) {
+      continue;
+    }
+
+    for (const edge of (adjacency.get(current) ?? [])) {
       const neighbor = edge.source === current ? edge.target : edge.source;
-      if (visited.has(neighbor)) {
-        continue;
+      const newCost = cost + edgeWeight(edge);
+      if (newCost < (dist.get(neighbor) ?? Infinity)) {
+        dist.set(neighbor, newCost);
+        parentNode.set(neighbor, current);
+        parentEdge.set(neighbor, edge);
+        pq.push({ id: neighbor, cost: newCost });
       }
-      visited.add(neighbor);
-      parentNode.set(neighbor, current);
-      parentEdge.set(neighbor, edge);
-      queue.push(neighbor);
     }
   }
 
-  if (!visited.has(target.id)) {
+  if (!parentNode.has(target.id)) {
     return null;
   }
 
@@ -120,7 +135,8 @@ export function shortestPath(
 
   return {
     nodes: nodeIds.reverse().map((id) => nodeMap.get(id)).filter((value): value is GraphBuilderNode => Boolean(value)),
-    edges: edges.reverse()
+    edges: edges.reverse(),
+    totalWeight: dist.get(target.id) ?? 0
   };
 }
 
@@ -147,26 +163,39 @@ export function getCommunityNodes(graph: GraphBuilderGraph, id: number): GraphBu
   return graph.nodes.filter((node) => node.community === id);
 }
 
+const TYPE_PRIORITY: Record<string, number> = {
+  document: 4, code_file: 4,
+  class: 3, function: 3, interface: 3, enum: 3,
+  method: 2, property: 2, type: 2,
+  heading: 2, memory_fact: 2,
+  symbol: 1, schema_object: 1, schema_field: 1,
+  resource: -2, tag: -2, package: -2
+};
+
 function scoreNodes(graph: GraphBuilderGraph, query: string): Array<{ node: GraphBuilderNode; score: number }> {
   const terms = normalizeLabel(query).split(/\s+/).filter(Boolean);
   return graph.nodes
     .map((node) => {
       const label = node.normalizedLabel ?? normalizeLabel(node.label);
       const path = typeof node.metadata?.path === "string" ? normalizeLabel(node.metadata.path) : "";
+      const typePriority = TYPE_PRIORITY[node.type] ?? 0;
       const score = terms.reduce((accumulator, term) => {
         let next = accumulator;
         if (label === term) {
           next += 100;
-        }
-        if (label.includes(term)) {
+        } else if (label.startsWith(term)) {
+          next += 50;
+        } else if (label.includes(term)) {
           next += 10;
         }
-        if (path.includes(term)) {
+        if (path.startsWith(term)) {
+          next += 8;
+        } else if (path.includes(term)) {
           next += 5;
         }
         return next;
       }, 0);
-      return { node, score };
+      return { node, score: score > 0 ? score + typePriority : 0 };
     })
     .filter((entry) => entry.score > 0)
     .sort((left, right) => right.score - left.score);

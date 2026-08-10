@@ -1,8 +1,8 @@
 import { buildGraph, validateGraph, withInferredReferences } from "./core/build.js";
 import { updateGraph } from "./core/incremental.js";
 import { createArrayProvider } from "./core/provider.js";
-import { getNeighbors, getNode, queryGraph, shortestPath } from "./core/query.js";
-import { analyzeGraph } from "./core/analyze.js";
+import { createQueryContext, getNeighbors, getNode, queryGraph, shortestPath } from "./core/query.js";
+import { analyzeGraph, applyCommunityAssignments } from "./core/analyze.js";
 import { buildArtifacts, generateHtml, generateReport, generateWiki, serializeGraph } from "./core/artifacts.js";
 import { createGraphBuilder } from "./core/graph-builder.js";
 import { loadGraphBuilderResult } from "./core/result.js";
@@ -56,10 +56,12 @@ export const graphBuilder = Object.assign(
 
 export {
   analyzeGraph,
+  applyCommunityAssignments,
   buildArtifacts,
   buildGraph,
   createArrayProvider,
   createGraphBuilder,
+  createQueryContext,
   generateHtml,
   generateReport,
   generateWiki,
@@ -83,6 +85,9 @@ export {
 } from "./adapters/memory.js";
 
 export type { GraphBuilderMemoryFactRecord } from "./adapters/memory.js";
+
+export type { GraphQueryContext, GraphQueryInput } from "./core/query.js";
+export type { CreateGraphBuilderResultOptions, LoadGraphBuilderResultOptions } from "./core/result.js";
 
 export type {
   GraphBuilderAnalysis,

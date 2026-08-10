@@ -1,6 +1,6 @@
 {
   "name": "@cognipeer/graph-builder",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "API-first text graph builder for JavaScript and TypeScript applications.",
   "license": "MIT",
   "type": "module",

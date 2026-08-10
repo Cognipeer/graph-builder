@@ -1,5 +1,4 @@
-import { analyzeGraph } from "./analyze.js";
-import { buildArtifacts } from "./artifacts.js";
+import { analyzeGraph, applyCommunityAssignments } from "./analyze.js";
 import { buildGraph, validateGraph } from "./build.js";
 import { collectChangedTextItems, collectTextItems } from "./provider.js";
 import { createGraphBuilderResult, loadGraphBuilderResult } from "./result.js";
@@ -82,7 +81,7 @@ export function createGraphBuilder(config: GraphBuilderConfig = {}) {
     warnings.push(...validateGraph(graph));
 
     const analysis = analyzeGraph(graph);
-    const artifacts = buildArtifacts(graph, analysis, options.artifacts ?? defaults.defaultArtifacts);
+    graph = applyCommunityAssignments(graph, analysis);
 
     return createGraphBuilderResult(graph, {
       warnings,
@@ -90,7 +89,10 @@ export function createGraphBuilder(config: GraphBuilderConfig = {}) {
       errors: [],
       timings,
       modelUsage
-    }, artifacts);
+    }, {
+      analysis,
+      artifactKinds: options.artifacts ?? defaults.defaultArtifacts
+    });
   }
 
   return {

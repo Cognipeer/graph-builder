@@ -1,5 +1,4 @@
-import { analyzeGraph } from "./analyze.js";
-import { buildArtifacts } from "./artifacts.js";
+import { analyzeGraph, applyCommunityAssignments } from "./analyze.js";
 import { buildGraph, validateGraph, withInferredReferences } from "./build.js";
 import { normalizeTextItem } from "./provider.js";
 import { createGraphBuilderResult } from "./result.js";
@@ -180,6 +179,7 @@ export async function updateGraph(
 
   warnings.push(...validateGraph(graph));
   const analysis = analyzeGraph(graph);
+  graph = applyCommunityAssignments(graph, analysis);
   graph = attachGraphHistory(graph, {
     timestamp,
     label: "update",
@@ -187,7 +187,6 @@ export async function updateGraph(
     timelineEntries: createUpdateTimeline(previousGraph, upsertItems, deleteSourceItemIds, timestamp),
     changes: diffGraphs(previousGraph, graph, timestamp)
   });
-  const artifacts = buildArtifacts(graph, analysis, options.artifacts ?? ["json", "report"]);
 
   return createGraphBuilderResult(graph, {
     warnings,
@@ -195,5 +194,8 @@ export async function updateGraph(
     errors: [],
     timings,
     modelUsage
-  }, artifacts);
+  }, {
+    analysis,
+    artifactKinds: options.artifacts ?? ["json", "report"]
+  });
 }

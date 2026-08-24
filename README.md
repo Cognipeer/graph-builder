@@ -4,6 +4,8 @@
 
 The package is built to be embedded inside other apps first. CLI and external adapters can be added later without changing the core API.
 
+
+Documentation: <https://docs.cognipeer.com/graph-builder/guide/getting-started>
 ## Install
 
 ```bash

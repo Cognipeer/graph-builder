@@ -1,6 +1,6 @@
 {
   "name": "@cognipeer/graph-builder",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "API-first text graph builder for JavaScript and TypeScript applications.",
   "license": "MIT",
   "type": "module",
@@ -75,12 +75,12 @@
   "author": "cognipeer",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Cognipeer/graph-builder.git"
+    "url": "https://github.com/Cognipeer/graph-builder.git"
   },
   "bugs": {
     "url": "https://github.com/Cognipeer/graph-builder/issues"
   },
-  "homepage": "https://github.com/Cognipeer/graph-builder#readme",
+  "homepage": "https://docs.cognipeer.com/graph-builder/",
   "directories": {
     "doc": "docs",
     "example": "examples"

@@ -6,6 +6,12 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-08-28
+
+### Added
+
+- Added Node 24 CI and npm Trusted Publishing release workflows.
+
 ## [0.2.0] - 2026-08-10
 
 ### Added

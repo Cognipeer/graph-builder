@@ -7,7 +7,7 @@
 [![stars](https://img.shields.io/github/stars/Cognipeer/graph-builder?style=social)](https://github.com/Cognipeer/graph-builder)
 [![docs](https://img.shields.io/badge/docs-docs.cognipeer.com-0A7CFF)](https://docs.cognipeer.com/graph-builder/)
 
-[Docs](https://docs.cognipeer.com/graph-builder/) · [Quick start](#quick-start) · [Examples](./examples) · [Changelog](./CHANGELOG.md)
+[Docs](https://docs.cognipeer.com/graph-builder/) · [Quick start](#quick-start) · [Examples](./examples) · [Changelog](./CHANGELOG.md) · [Contact](mailto:developer@cognipeer.com)
 
 `@cognipeer/graph-builder` is built to be embedded inside other apps first. CLI and external adapters can be added later without changing the core API.
 
@@ -191,3 +191,5 @@ If you omit `semantic`, Graph Builder stays fully deterministic.
 | [cognipeer-observability](https://github.com/Cognipeer/cognipeer-observability) | Drop-in agent tracing for LangChain, LangGraph, OpenAI Agents and OpenTelemetry |
 
 If this project is useful to you, a ⭐ on GitHub helps other developers find it.
+
+Questions or enterprise support: [developer@cognipeer.com](mailto:developer@cognipeer.com).

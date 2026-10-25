@@ -1,11 +1,16 @@
 # Graph Builder
 
-`@cognipeer/graph-builder` is an API-first TypeScript library for turning text sources into a queryable graph.
+**API-first TypeScript library for turning text sources into a queryable graph, built to be embedded inside your own apps.**
 
-The package is built to be embedded inside other apps first. CLI and external adapters can be added later without changing the core API.
+[![npm](https://img.shields.io/npm/v/@cognipeer/graph-builder)](https://www.npmjs.com/package/@cognipeer/graph-builder)
+[![license](https://img.shields.io/github/license/Cognipeer/graph-builder)](./LICENSE)
+[![stars](https://img.shields.io/github/stars/Cognipeer/graph-builder?style=social)](https://github.com/Cognipeer/graph-builder)
+[![docs](https://img.shields.io/badge/docs-docs.cognipeer.com-0A7CFF)](https://docs.cognipeer.com/graph-builder/)
 
+[Docs](https://docs.cognipeer.com/graph-builder/) · [Quick start](#quick-start) · [Examples](./examples) · [Changelog](./CHANGELOG.md)
 
-Documentation: <https://docs.cognipeer.com/graph-builder/guide/getting-started>
+`@cognipeer/graph-builder` is built to be embedded inside other apps first. CLI and external adapters can be added later without changing the core API.
+
 ## Install
 
 ```bash
@@ -172,3 +177,17 @@ If you omit `semantic`, Graph Builder stays fully deterministic.
 - The `adapters/to-markdown` subpath provides a wrapper for plugging in `@cognipeer/to-markdown` style converters.
 - The `adapters/openai-compatible` subpath provides an optional semantic enricher for OpenAI-compatible chat-completions APIs.
 - `graph.html` and other exports can be generated through the artifact API or the `./node` output helpers.
+
+## Cognipeer open-source projects
+
+| Project | What it does |
+| --- | --- |
+| [Cognipeer Console](https://github.com/Cognipeer/console) | Self-hosted AI gateway and control plane: OpenAI-compatible routing, RAG, MCP hub, guardrails and agent tracing |
+| [console-sdk](https://github.com/Cognipeer/console-sdk) | TypeScript SDK for the Cognipeer Console API |
+| [agent-sdk](https://github.com/Cognipeer/agent-sdk) | Lightweight, message-first agent runtime |
+| [agent-server](https://github.com/Cognipeer/agent-server) | Ready-made REST API layer for AI agents |
+| [chat-ui](https://github.com/Cognipeer/chat-ui) | React chat UI components for AI agents |
+| [to-markdown](https://github.com/Cognipeer/to-markdown) | Convert PDF, Office, HTML and more to Markdown for LLM pipelines |
+| [cognipeer-observability](https://github.com/Cognipeer/cognipeer-observability) | Drop-in agent tracing for LangChain, LangGraph, OpenAI Agents and OpenTelemetry |
+
+If this project is useful to you, a ⭐ on GitHub helps other developers find it.

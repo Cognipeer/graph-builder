@@ -3,7 +3,7 @@
 **API-first TypeScript library for turning text sources into a queryable graph, built to be embedded inside your own apps.**
 
 [![npm](https://img.shields.io/npm/v/@cognipeer/graph-builder)](https://www.npmjs.com/package/@cognipeer/graph-builder)
-[![license](https://img.shields.io/github/license/Cognipeer/graph-builder)](./LICENSE)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![stars](https://img.shields.io/github/stars/Cognipeer/graph-builder?style=social)](https://github.com/Cognipeer/graph-builder)
 [![docs](https://img.shields.io/badge/docs-docs.cognipeer.com-0A7CFF)](https://docs.cognipeer.com/graph-builder/)
 
